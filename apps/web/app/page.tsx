@@ -21,7 +21,7 @@ const page = () => {
       </div>  
 
       <div className={classes["chat-action-container"]}>
-        <input onChange={e => setMessage(e.target.value)} className={classes["chat-input"]}  type="text" />
+        <input onChange={e => {setMessage(e.target.value)}} className={classes["chat-input"]}  type="text" />
         <button onClick={() => sendMessage(message)}  className={classes.button } >Send</button>
       </div>
     </div>

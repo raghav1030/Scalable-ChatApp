@@ -1,5 +1,8 @@
 import { Server } from "socket.io";
 import { Redis } from "ioredis";
+import prismaClient from "./prisma";
+import { startMessageConsumer, produceMessage } from "./kafka";
+
 
 const pub = new Redis({
     host: "redis-3c6a624b-socketio-chat-app.a.aivencloud.com",
@@ -36,6 +39,7 @@ class SocketService {
     public initListners(){
         const io = this._io
         console.log("init Socket Listners...")
+        startMessageConsumer()
         io.on("connect" , async(socket) =>{
             console.log("New Socket Connected" , socket.id)
             socket.on("event:message" , async({message} : {message : string}) =>{
@@ -44,11 +48,21 @@ class SocketService {
             })
         })
 
-        sub.on("message" , (channel , message) =>{
+
+        sub.on("message" , async(channel , message) =>{
             
             if(channel === "MESSAGES"){
+                // await prismaClient.message.create({
+                //     data:{
+                //         text : message,
+                //     }
+                // })
+
+                await produceMessage(message)
+
                 io.emit("new-message" , message)
                 console.log("new message in channel from redis" , channel , message)
+
             }
 
         })
